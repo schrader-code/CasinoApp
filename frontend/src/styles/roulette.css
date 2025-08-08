@@ -1,0 +1,82 @@
+/* src/styles/roulette.css */
+
+:root {
+  --casino-bg: #0b132b;
+  --casino-card: #1c2541;
+  --casino-accent: #3a506b;
+  --casino-text: #e0e6f0;
+  --casino-green: #2ecc71;
+  --casino-red: #e74c3c;
+  --casino-yellow: #f1c40f;
+}
+
+.roulette-root {
+  min-height: 60vh;
+  background: linear-gradient(180deg, var(--casino-bg), #0f1a3a);
+  color: var(--casino-text);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.roulette-stage {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 16px;
+}
+
+.roulette-card {
+  background: var(--casino-card);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.roulette-board {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  border-radius: 12px;
+  background: #0f0f0f;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.roulette-wheel {
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  border: 8px solid #222;
+  display: grid;
+  place-items: center;
+}
+
+.roulette-controls {
+  display: grid;
+  gap: 10px;
+}
+
+.btn-spin {
+  cursor: pointer;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  background: var(--casino-green);
+  color: #06240f;
+  transition: transform .06s ease-in-out, opacity .2s ease-in-out;
+}
+.btn-spin:active { transform: translateY(1px) }
+
+.chip {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  user-select: none;
+  border: 2px solid rgba(255,255,255,.4);
+}
+.chip.red   { background: var(--casino-red) }
+.chip.black { background: #111 }
+.chip.green { background: #1abc9c }
