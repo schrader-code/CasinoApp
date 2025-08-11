@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { login, register } from '../lib/api'
 import { saveSession } from '../lib/auth'
+import '../styles/auth.css'
 
 export default function Login() {
   const nav = useNavigate()
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [showPass, setShowPass] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -15,61 +17,96 @@ export default function Login() {
     e.preventDefault()
     setError(null)
     if (!username || !password) {
-      setError('Fill username and password')
+      setError('Llena usuario y contraseña')
       return
     }
     try {
       setLoading(true)
       if (mode === 'register') {
-        await register(username, password) // crea el usuario
+        await register(username, password)
       }
-      const { data } = await login(username, password) // { token, user }
+      const { data } = await login(username, password)
       saveSession(data.token, data.user)
       nav('/lobby')
     } catch (err: any) {
-      setError(err?.response?.data?.error || (mode === 'register' ? 'Register failed' : 'Login failed'))
+      const msg = err?.response?.data?.error || (mode === 'register' ? 'Registro fallido' : 'Login fallido')
+      setError(msg)
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div style={{maxWidth:420, margin:'48px auto', padding:24, border:'1px solid #ddd', borderRadius:12}}>
-      <h2>Casino App</h2>
+    <div className="auth-wrap">
+      <form className="auth-card" onSubmit={handleSubmit}>
+        <h1 className="auth-title">Casino App</h1>
 
-      <div style={{display:'flex', gap:8, marginBottom:12}}>
-        <button
-          type="button"
-          onClick={() => setMode('login')}
-          style={{padding:'8px 12px', borderRadius:8, border:'1px solid #ccc', background: mode==='login' ? '#eee' : '#fff'}}
-        >
-          Login
-        </button>
-        <button
-          type="button"
-          onClick={() => setMode('register')}
-          style={{padding:'8px 12px', borderRadius:8, border:'1px solid #ccc', background: mode==='register' ? '#eee' : '#fff'}}
-        >
-          Register
-        </button>
-      </div>
+        {/* Tabs */}
+        <div className="tabs">
+          <button
+            type="button"
+            className={`tab ${mode === 'login' ? 'active' : ''}`}
+            onClick={() => setMode('login')}
+          >
+            Login
+          </button>
+          <button
+            type="button"
+            className={`tab ${mode === 'register' ? 'active' : ''}`}
+            onClick={() => setMode('register')}
+          >
+            Register
+          </button>
+        </div>
 
-      <form onSubmit={handleSubmit} style={{display:'grid', gap:12}}>
+        {/* Inputs */}
+        <label className="label" htmlFor="username">Username</label>
         <input
-          placeholder="Username"
+          id="username"
+          className="input"
+          placeholder="Tu usuario"
           value={username}
-          onChange={e=>setUsername(e.target.value)}
+          onChange={e => setUsername(e.target.value)}
+          autoComplete="username"
         />
-        <input
-          placeholder="Password"
-          type="password"
-          value={password}
-          onChange={e=>setPassword(e.target.value)}
-        />
-        {error && <div style={{color:'crimson'}}>{error}</div>}
-        <button type="submit" disabled={loading}>
-          {loading ? (mode==='register' ? 'Creating…' : 'Signing in…') : (mode==='register' ? 'Create account & Login' : 'Login')}
+
+        <label className="label" htmlFor="password">Password</label>
+        <div className="pass-row">
+          <input
+            id="password"
+            className="input"
+            placeholder="••••••••"
+            type={showPass ? 'text' : 'password'}
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+          />
+          <button
+            type="button"
+            className="btn ghost small"
+            onClick={() => setShowPass(s => !s)}
+            aria-label={showPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+          >
+            {showPass ? 'Ocultar' : 'Mostrar'}
+          </button>
+        </div>
+
+        {error && <div className="alert">{error}</div>}
+
+        <button className="btn primary wide" type="submit" disabled={loading}>
+          {loading ? (mode === 'register' ? 'Creando…' : 'Entrando…') : (mode === 'register' ? 'Crear cuenta' : 'Login')}
         </button>
+
+        <p className="hint">
+          {mode === 'login' ? '¿No tienes cuenta?' : '¿Ya tienes cuenta?'}{' '}
+          <button
+            type="button"
+            className="link"
+            onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
+          >
+            {mode === 'login' ? 'Regístrate' : 'Inicia sesión'}
+          </button>
+        </p>
       </form>
     </div>
   )
