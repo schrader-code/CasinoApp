@@ -1,68 +1,215 @@
-/* Nada global. Todo va con prefijo rl- o dentro de .roulette-wrap */
-
-.roulette-wrap{ padding:20px; max-width:1100px; margin:0 auto; }
-.roulette-wrap{ color: var(--text); }
-
-.rl-topbar{ display:flex; gap:12px; align-items:center; justify-content:space-between; margin-bottom:14px; }
-.rl-bet-group{ display:flex; flex-wrap:wrap; gap:8px; }
-
-.rl-chip{
-  border:1px solid var(--border); background:transparent; color:var(--text);
-  padding:8px 10px; border-radius:999px; cursor:pointer;
-}
-.rl-chip.active{ border-color: var(--primary); box-shadow:0 0 0 2px color-mix(in srgb, var(--primary) 30%, transparent); }
-
-.rl-btn{ border:1px solid var(--border); background:transparent; color:var(--text); padding:10px 14px; border-radius:10px; cursor:pointer; }
-.rl-primary{ background: var(--primary); border-color: var(--primary); color:#fff; }
-
-.rl-stage{ display:grid; grid-template-columns: 360px 1fr; gap:18px; align-items:center; }
-@media (max-width:900px){ .rl-stage{ grid-template-columns: 1fr; } }
-
-.rl-wheel-wrap{ position:relative; width:360px; height:360px; margin:0 auto; }
-.rl-pin{
-  position:absolute; top:-6px; left:50%; transform:translateX(-50%);
-  width:0; height:0; border-left:10px solid transparent; border-right:10px solid transparent; border-bottom:16px solid #ffd54a;
-  filter: drop-shadow(0 2px 2px rgba(0,0,0,.4));
-}
-.rl-wheel{
-  position:absolute; inset:0; border-radius:50%;
-  background: radial-gradient(#2a2f3b, #12151b); /* el conic-gradient se inyecta inline */
-  overflow:hidden;
+/* src/styles/roulette.css */
+.roulette-root {
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  min-height: 100dvh;
+  background: #0f1220;
+  color: #e7e9ee;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
-/* números */
-.rl-labels{ position:absolute; inset:0; display:grid; place-items:center; pointer-events:none; }
-.rl-label{
-  position:absolute; transform-origin:center;
-  width: 28px; height: 24px; line-height:24px; text-align:center; font-weight:700; font-size:12px;
-  border-radius:6px; color:#f5f6f8; text-shadow:0 1px 2px rgba(0,0,0,.6);
-}
-.rl-label.red{ background:#b91c1c; }
-.rl-label.black{ background:#111827; }
-.rl-label.green{ background:#059669; }
-
-/* Pelota */
-.rl-ball-orbit{ position:absolute; inset:0; display:grid; place-items:center; }
-.rl-ball{
-  --ball-r: 148px;
-  width:14px; height:14px; border-radius:50%;
-  background:#fff; box-shadow:0 0 0 1px #ddd inset, 0 2px 6px rgba(0,0,0,.6);
-  transform: rotate(0deg) translateX(var(--ball-r)) rotate(0deg);
-}
-.rl-ball-spin{ animation: rlBallOrbit 4.8s cubic-bezier(.2,.9,.1,1) forwards; }
-@keyframes rlBallOrbit{
-  0%   { transform: rotate(0deg) translateX(148px) rotate(0deg); }
-  80%  { transform: rotate(2880deg) translateX(136px) rotate(0deg); }
-  100% { transform: rotate(3060deg) translateX(130px) rotate(0deg); }
+.roulette-card {
+  background: #171a2b;
+  border: 1px solid #242844;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  width: min(92vw, 680px);
 }
 
-.rl-board{ border:1px solid var(--border); border-radius:12px; overflow:hidden; background:var(--card); }
-.rl-board img{ display:block; width:100%; height:auto; }
+.roulette-title {
+  margin: 0 0 12px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
 
-.rl-result{ margin-top:14px; }
-.rl-badge{ display:inline-flex; gap:8px; align-items:center; border:1px solid var(--border); padding:8px 12px; border-radius:999px; }
-.rl-badge.red{ background:#7f1d1d; color:#fecaca; border-color:#fecaca33; }
-.rl-badge.black{ background:#0b0b0d; color:#f3f4f6; border-color:#ffffff22; }
-.rl-badge.green{ background:#064e3b; color:#bbf7d0; border-color:#bbf7d033; }
+.roulette-stage {
+  position: relative;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  user-select: none;
+}
 
-.rl-muted{ color:#9aa0a6; }
+.wheel {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  will-change: transform;
+}
+
+.wheel-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  pointer-events: none;
+}
+
+/* (Opcional) un poco de sombra para relieve general */
+.wheel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow:
+    inset 0 0 0 6px rgba(0,0,0,0.45),
+    0 8px 25px rgba(0,0,0,0.35);
+  pointer-events: none;
+}
+
+.wheel--fallback {
+  /* Si Board.png no existe, mostramos un patrón básico */
+  background:
+    conic-gradient(#a6322f 0 10deg, #0c0d17 10deg 20deg),
+    radial-gradient(circle at 50% 50%, #2d3048 0 58%, #191c2f 58% 100%);
+}
+
+.track {
+  position: absolute;
+  inset: 6%;
+  border-radius: 50%;
+  border: 6px solid rgba(255,255,255,0.08);
+  box-shadow: inset 0 0 12px rgba(0,0,0,0.5);
+  pointer-events: none;
+}
+
+.ball {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  background: radial-gradient(circle at 30% 30%, #ffffff, #d9d9d9 55%, #bdbdbd 100%);
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.55);
+  will-change: transform;
+}
+
+.hub {
+  position: absolute;
+  border-radius: 50%;
+  inset: 38%;
+  background: radial-gradient(circle at 30% 30%, #24273e, #1a1d31 60%, #121428);
+  box-shadow:
+    inset 0 6px 14px rgba(0,0,0,0.55),
+    0 2px 10px rgba(0,0,0,0.35);
+  pointer-events: none;
+}
+
+.ball { z-index: 5; }
+.hub  { z-index: 6; }
+.track{ z-index: 4; }
+.wheel{ z-index: 3; }
+
+.roulette-stage {
+  background-size: cover;
+  background-position: center;
+  border-radius: 50%;
+  position: relative;
+}
+
+
+.controls {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.btn {
+  appearance: none;
+  border: 1px solid #3a3f6b;
+  background: #232744;
+  color: #e7e9ee;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.btn:hover:not(:disabled) { filter: brightness(1.08); }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-secondary { background: #1c2038; }
+.hint {
+  opacity: 0.75;
+  font-size: 13px;
+  text-align: center;
+  margin: 10px 0 0;
+}
+
+
+/* --- Winner Overlay --- */
+.roulette-card { position: relative; }
+
+.winner-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(12, 14, 24, 0.55);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease;
+  z-index: 20;
+}
+
+.winner-overlay--show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.winner-card {
+  background: #121428;
+  border: 1px solid #2a2f55;
+  border-radius: 16px;
+  padding: 16px 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+  text-align: center;
+  min-width: 260px;
+  animation: winner-pop .5s ease;
+}
+
+@keyframes winner-pop {
+  0%   { transform: scale(.85); opacity: 0; }
+  60%  { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+.winner-number {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 42px;
+  font-weight: 800;
+  margin: 8px auto 12px;
+  color: #fff;
+  box-shadow:
+    inset 0 0 0 4px rgba(255,255,255,0.1),
+    0 10px 30px rgba(0,0,0,0.45);
+}
+
+.winner-number--red {
+  background: radial-gradient(circle at 30% 30%, #ff5a5a, #b30000 70%);
+}
+.winner-number--black {
+  background: radial-gradient(circle at 30% 30%, #696c72, #0b0b0b 70%);
+}
+.winner-number--green {
+  background: radial-gradient(circle at 30% 30%, #64f09b, #0f8f44 70%);
+}
+
+.winner-sub { opacity: .9; font-size: 14px; margin: 2px 0 12px; }
+
+.winner-actions { display: flex; justify-content: center; }
+.winner-actions .btn { min-width: 120px; }
+
+/* Confetti Canvas on top of overlay */
+.confetti-canvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
