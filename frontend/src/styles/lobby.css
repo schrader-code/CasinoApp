@@ -77,3 +77,82 @@ body { margin: 0; background: var(--bg); color: var(--text); font-family: system
   display:inline-flex; gap:8px; align-items:center;
   border:1px solid var(--border); padding:6px 10px; border-radius: 999px; font-size: 14px;
 }
+
+
+/* ===== Modal Topup ===== */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(10,12,22,.6);
+  backdrop-filter: blur(2px);
+  display: grid; place-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #121428;
+  border: 1px solid #2a2f55;
+  border-radius: 16px;
+  padding: 18px 20px;
+  width: min(440px, 92vw);
+  box-shadow: 0 20px 60px rgba(0,0,0,.45);
+  animation: modal-pop .18s ease;
+}
+@keyframes modal-pop {
+  0% { transform: translateY(6px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+.modal-title {
+  font-weight: 800; margin-bottom: 10px;
+}
+
+.topup-form { display: grid; gap: 10px; }
+.topup-label { font-size: 13px; opacity: .9; }
+.topup-input {
+  width: 100%;
+  background: #1a1e39; color: #e7e9ee;
+  border: 1px solid #2d335c; border-radius: 10px;
+  padding: 10px 12px; font-weight: 700;
+}
+.topup-input:focus { outline: 2px solid #7aa2ff; }
+
+.topup-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;                 /* espacio real entre chips */
+}
+
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.topup-hint { opacity: .75; font-size: 12px; }
+
+/* Botones y chips (siguen tu línea visual) */
+.btn.primary {
+  background: linear-gradient(#4850a8, #262f84);
+  border-color: #39419a;
+  color: #e7e9ee;
+}
+
+.chip {
+  border: 1px solid #3a3f6b;
+  background: radial-gradient(circle at 30% 30%, #2b2f53, #1b1f3b 70%);
+  color:#e7e9ee; padding:8px 12px; border-radius:999px; font-weight:700;
+  cursor:pointer; transition: transform .12s ease, filter .12s ease;
+}
+.chip:hover { filter:brightness(1.08); }
+
+
+.topup-quick .chip {
+  display: inline-flex;     /* centra el texto dentro */
+  align-items: center;
+  justify-content: center;
+  height: 36px;             /* alto consistente */
+  padding: 0 12px;          /* ancho según contenido */
+  min-width: 64px;          /* evita que +$100/+1000 se aplasten */
+  box-sizing: border-box;
+  font-size: 14px;          /* un pelín más chico para que quepa cómodo */
+  line-height: 1;
+  white-space: nowrap;      /* no romper el texto */
+}
+
+
+.topup-quick .chip + .chip { margin-left: 0; } /* por si algún reset rompe gap */
+.topup-quick .chip:active { transform: translateY(1px); }
