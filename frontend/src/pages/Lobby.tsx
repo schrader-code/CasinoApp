@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getUser, getToken, clearSession, saveSession } from '../lib/auth';
 import { useAuthGuard } from '../lib/useAuthGuard';
 import GameCard from '../components/GameCard';
+import { topup } from '../lib/api'; // ⬅️ usa el endpoint del backend
 import '../styles/lobby.css';
 
 export default function Lobby() {
@@ -30,23 +31,10 @@ export default function Lobby() {
     }
   }, []);
 
-  // Persistir saldo en la sesión + estado
-  const persistBalance = (newBal: number) => {
-    const user = userRef.current;
-    const token = tokenRef.current;
-    if (!user || !token) {
-      alert('Inicia sesión primero.');
-      return;
-    }
-    const updated = { ...user, balance: newBal };
-    saveSession(token, updated);
-    userRef.current = updated;
-    setBalance(newBal);
-  };
-
   // ─────────── Modal de Añadir saldo ───────────
   const [topupOpen, setTopupOpen] = useState(false);
   const [amountStr, setAmountStr] = useState('100');
+  const [loadingTopup, setLoadingTopup] = useState(false);
 
   const amountParsed = (() => {
     const n = Math.floor(Number(amountStr));
@@ -55,13 +43,37 @@ export default function Lobby() {
   })();
 
   const quickSet = (n: number) => setAmountStr(String(n));
-  const quickAdd = (n: number) =>
-    setAmountStr(String((amountParsed || 0) + n));
+  const quickAdd = (n: number) => setAmountStr(String((amountParsed || 0) + n));
 
-  const submitTopup = (e?: React.FormEvent) => {
+  // Llama al backend para sumar saldo y sincroniza la sesión
+  const doTopup = async (delta: number) => {
+    const user = userRef.current;
+    const token = tokenRef.current;
+    if (!user || !token) {
+      alert('Inicia sesión primero.');
+      return;
+    }
+    try {
+      setLoadingTopup(true);
+      const { data } = await topup(user.id, delta); // POST /wallet/topup
+      const newBal = Number(data?.balance ?? 0);
+
+      setBalance(newBal);
+      const updated = { ...user, balance: newBal };
+      saveSession(token, updated); // mantiene la sesión coherente con la BD
+      userRef.current = updated;
+    } catch (e) {
+      console.error('TOPUP ERROR', e);
+      alert('No se pudo actualizar el saldo en el servidor.');
+    } finally {
+      setLoadingTopup(false);
+    }
+  };
+
+  const submitTopup = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (amountParsed <= 0) return;
-    persistBalance(balance + amountParsed);
+    if (amountParsed <= 0 || loadingTopup) return;
+    await doTopup(amountParsed);      // ⬅️ enviamos el delta al backend
     setTopupOpen(false);
     setAmountStr('100');
   };
@@ -104,7 +116,6 @@ export default function Lobby() {
       <section className="hero">
         <div>
           <h2>Lobby</h2>
-          <p className="muted">Elige un juego para empezar.</p>
         </div>
         <div className="quick">
           <a className="btn primary" href="/roulette">
@@ -131,10 +142,7 @@ export default function Lobby() {
 
       {/* Modal Topup */}
       {topupOpen && (
-        <div
-          className="modal-overlay"
-          onClick={() => setTopupOpen(false)}
-        >
+        <div className="modal-overlay" onClick={() => setTopupOpen(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-title">Añadir saldo</div>
             <form className="topup-form" onSubmit={submitTopup}>
@@ -173,20 +181,21 @@ export default function Lobby() {
                   type="button"
                   className="btn"
                   onClick={() => setTopupOpen(false)}
+                  disabled={loadingTopup}
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   className="btn primary"
-                  disabled={amountParsed <= 0}
+                  disabled={amountParsed <= 0 || loadingTopup}
                 >
-                  Añadir
+                  {loadingTopup ? 'Añadiendo…' : 'Añadir'}
                 </button>
               </div>
 
               <div className="topup-hint">
-                No se requiere método de pago. Esto solo actualiza tu saldo local para pruebas.
+                Este monto se agrega a tu saldo en el servidor.
               </div>
             </form>
           </div>

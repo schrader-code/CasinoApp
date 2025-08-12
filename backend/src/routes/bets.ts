@@ -5,9 +5,11 @@ const router = Router();
 
 router.post("/", async (req, res) => {
   const { user_id, game, amount, outcome, payout, meta } = req.body;
-  if(!user_id || !game || !amount || outcome===undefined || payout===undefined) {
+
+  if (!user_id || !game || amount === undefined || outcome === undefined || payout === undefined) {
     return res.status(400).json({ error: "missing fields" });
   }
+
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
@@ -17,17 +19,22 @@ router.post("/", async (req, res) => {
       [user_id, game, amount, outcome, payout, meta ? JSON.stringify(meta) : null]
     );
 
-    // actualiza balance (payout - amount)
+    // Actualiza balance con el neto (payout - amount)
     await conn.execute(
       "UPDATE users SET balance = balance + ? WHERE id = ?",
       [payout - amount, user_id]
     );
 
+    // ⬇️ Recupera el balance actualizado y lo devuelve
+    const [rows] = await conn.execute("SELECT balance FROM users WHERE id = ?", [user_id]);
+    const row: any = Array.isArray(rows) && rows[0] ? rows[0] : null;
+    const balance = Number(row?.balance ?? 0);
+
     await conn.commit();
-    res.json({ ok: true });
+    return res.json({ ok: true, balance });
   } catch (e) {
     await conn.rollback();
-    res.status(500).json({ error: "server error" });
+    return res.status(500).json({ error: "server error" });
   } finally {
     conn.release();
   }

@@ -11,7 +11,7 @@ import "../styles/roulette.css";
 import { getUser, getToken, saveSession } from "../lib/auth";
 
 // ⬇️ ponlo en true cuando tu backend /bets esté listo
-const USE_BACKEND = false;
+const USE_BACKEND = true;
 
 // Orden europeo (índice→número)
 const WHEEL_NUMBERS_EU: number[] = [

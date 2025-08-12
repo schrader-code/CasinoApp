@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import authRouter from "./routes/auth";
 import betsRouter from "./routes/bets";
+import walletRouter from "./routes/wallet"; // ← nuevo import
 import { pool } from "./db";
 
 dotenv.config();
@@ -26,6 +27,11 @@ app.get("/ping-db", async (_req, res) => {
 
 app.use("/auth", authRouter);
 app.use("/bets", betsRouter);
+
+app.use("/auth", authRouter);
+app.use("/bets", betsRouter);
+app.use("/wallet", walletRouter); // ← nuevo mount
+
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Backend running at http://localhost:${port}`));

@@ -23,3 +23,6 @@ export type BetPayload = {
 }
 
 export const postBet = (payload: BetPayload) => api.post('/bets', payload)
+
+export const topup = (user_id: number, amount: number) =>
+  api.post('/wallet/topup', { user_id, amount });
